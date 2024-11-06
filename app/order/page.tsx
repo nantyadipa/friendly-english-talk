@@ -11,6 +11,7 @@ export default function OrderFormComponent() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [packageName, setPackageName] = useState('')
+  const [isFormValid, setIsFormValid] = useState(false) // New state to check form validity
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -21,12 +22,18 @@ export default function OrderFormComponent() {
     }
   }, [searchParams])
 
+  // Update form validity whenever name or email changes
+  useEffect(() => {
+    setIsFormValid(name.trim() !== '' && email.trim() !== '')
+  }, [name, email])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const whatsappNumber = '6281336478448'
     const message = encodeURIComponent(`Nama: ${name}\nEmail: ${email}\nPaket: ${packageName}\n\nSaya tertarik dengan paket ${packageName}. Bisakah Anda memberikan informasi lebih lanjut?`)
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank')
+    window.open(`https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank')
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
@@ -38,20 +45,42 @@ export default function OrderFormComponent() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-gray-700">Name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="border-pink-200 focus:border-pink-400" />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="border-pink-200 focus:border-pink-400"
+              />
             </div>
             <div>
               <Label htmlFor="email" className="text-gray-700">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="border-pink-200 focus:border-pink-400" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="border-pink-200 focus:border-pink-400"
+              />
             </div>
             <div>
               <Label htmlFor="package" className="text-gray-700">Selected Package</Label>
-              <Input id="package" value={packageName} readOnly className="bg-purple-100 border-pink-200" />
+              <Input
+                id="package"
+                value={packageName}
+                readOnly
+                className="bg-purple-100 border-pink-200"
+              />
             </div>
           </form>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSubmit} className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300">
+          <Button
+            onClick={handleSubmit}
+            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300"
+            disabled={!isFormValid} // Disable button if form is invalid
+          >
             Submit and Chat on WhatsApp
           </Button>
         </CardFooter>
