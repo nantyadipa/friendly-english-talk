@@ -5,10 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import dynamic from 'next/dynamic'
-
-// Dynamically import SearchParamsComponent with { ssr: false } to disable server-side rendering
-const SearchParamsComponent = dynamic(() => import('@/components/ui/SearchParamsComponent'), { ssr: false });
+import PackageQueryComponent from '@/components/PackageQueryComponent'
 
 export default function OrderFormComponent() {
   const [name, setName] = useState('')
@@ -17,14 +14,9 @@ export default function OrderFormComponent() {
 
   const router = useRouter()
 
-  // Capture the package name from query parameters
-  useEffect(() => {
-    // Check if the package query is available before setting the package name
-    const packageQuery = router.query?.package as string | undefined
-    if (packageQuery) {
-      setPackageName(packageQuery)  // Set the package name from the URL query parameter
-    }
-  }, [router.query])  // Dependency on router.query
+  const handlePackageSelect = (pkg: string) => {
+    setPackageName(pkg)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +25,6 @@ export default function OrderFormComponent() {
       const message = encodeURIComponent(`Nama: ${name}\nEmail: ${email}\nPaket: ${packageName}\n\nSaya tertarik dengan paket ${packageName}. Bisakah Anda memberikan informasi lebih lanjut?`)
       window.open(`https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank')
 
-      // Redirect after form submission
       router.push('/order')
     }
   }
@@ -42,7 +33,7 @@ export default function OrderFormComponent() {
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
       <div className="w-full max-w-md bg-white shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Form</h2>
-        
+
         {/* Display the selected package name */}
         {packageName && (
           <h3 className="text-xl font-bold text-pink-600 mb-4">Selected Package: {packageName}</h3>
@@ -57,12 +48,12 @@ export default function OrderFormComponent() {
             <Label htmlFor="email" className="text-gray-700">Email</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="border-pink-200 focus:border-pink-400" />
           </div>
-          <div>
-            <Label htmlFor="package" className="text-gray-700">Selected Package</Label>
-            <Suspense fallback={<div>Loading...</div>}>
-              <SearchParamsComponent />
-            </Suspense>
-          </div>
+          
+          {/* Suspense wrapper for handling package query */}
+          <Suspense fallback={<div>Loading package...</div>}>
+            <PackageQueryComponent onPackageSelect={handlePackageSelect} />
+          </Suspense>
+
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300"
