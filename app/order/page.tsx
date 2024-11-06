@@ -5,43 +5,35 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useSearchParams } from 'next/navigation' // Import the hook from next/navigation
+import dynamic from 'next/dynamic'
 
-// Handle SearchParams dynamically
-const SearchParamsComponent = () => {
-  const searchParams = useSearchParams()
-  const [packageName, setPackageName] = useState('')
-
-  useEffect(() => {
-    const pkg = searchParams.get('package')
-    if (pkg) {
-      setPackageName(decodeURIComponent(pkg))
-    }
-  }, [searchParams])
-
-  return (
-    <Input
-      id="package"
-      value={packageName}
-      readOnly
-      className="bg-purple-100 border-pink-200"
-    />
-  )
-}
+// Dynamically import SearchParamsComponent with { ssr: false } to disable server-side rendering
+const SearchParamsComponent = dynamic(() => import('@/components/ui/SearchParamsComponent'), { ssr: false });
 
 export default function OrderFormComponent() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [packageName, setPackageName] = useState<string>('')
+
   const router = useRouter()
+
+  // Capture the package name from query parameters
+  useEffect(() => {
+    // Check if the package query is available before setting the package name
+    const packageQuery = router.query?.package as string | undefined
+    if (packageQuery) {
+      setPackageName(packageQuery)  // Set the package name from the URL query parameter
+    }
+  }, [router.query])  // Dependency on router.query
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (name && email) {
+    if (name && email && packageName) {
       const whatsappNumber = '6281336478448'
       const message = encodeURIComponent(`Nama: ${name}\nEmail: ${email}\nPaket: ${packageName}\n\nSaya tertarik dengan paket ${packageName}. Bisakah Anda memberikan informasi lebih lanjut?`)
       window.open(`https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank')
 
-      // Redirect if form is valid
+      // Redirect after form submission
       router.push('/order')
     }
   }
@@ -50,6 +42,12 @@ export default function OrderFormComponent() {
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
       <div className="w-full max-w-md bg-white shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Form</h2>
+        
+        {/* Display the selected package name */}
+        {packageName && (
+          <h3 className="text-xl font-bold text-pink-600 mb-4">Selected Package: {packageName}</h3>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name" className="text-gray-700">Name</Label>
@@ -65,7 +63,11 @@ export default function OrderFormComponent() {
               <SearchParamsComponent />
             </Suspense>
           </div>
-          <Button type="submit" className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300" disabled={!name || !email}>
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300"
+            disabled={!name || !email || !packageName}
+          >
             Submit and Chat on WhatsApp
           </Button>
         </form>
