@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -61,7 +61,9 @@ export default function OrderFormComponent() {
           </div>
           <div>
             <Label htmlFor="package" className="text-gray-700">Selected Package</Label>
-            <SearchParamsComponent />
+            <Suspense fallback={<div>Loading...</div>}>
+              <SearchParamsComponent />
+            </Suspense>
           </div>
           <Button type="submit" className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white transition-colors duration-300" disabled={!name || !email}>
             Submit and Chat on WhatsApp
