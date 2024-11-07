@@ -19,15 +19,25 @@ export default function OrderFormComponent() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (name && email && packageName) {
-      const whatsappNumber = '6281336478448'
-      const message = encodeURIComponent(`Nama: ${name}\nEmail: ${email}\nPaket: ${packageName}\n\nSaya tertarik dengan paket ${packageName}. Bisakah Anda memberikan informasi lebih lanjut?`)
-      window.open(`https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank')
+    e.preventDefault();
 
-      router.push('/order')
+    if (name && email && packageName) {
+      const whatsappNumber = '6281336478448';
+      const message = encodeURIComponent(
+        `Nama: ${name}\nEmail: ${email}\nPaket: ${packageName}\n\nSaya tertarik dengan paket ${packageName}. Bisakah Anda memberikan informasi lebih lanjut?`
+      );
+
+      // Check if user is on a mobile browser
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const whatsappUrl = isMobile
+        ? `https://wa.me/${whatsappNumber}?text=${message}`
+        : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`;
+
+      window.open(whatsappUrl, '_blank');
+      router.push('/order');
     }
-  }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
@@ -48,7 +58,7 @@ export default function OrderFormComponent() {
             <Label htmlFor="email" className="text-gray-700">Email</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="border-pink-200 focus:border-pink-400" />
           </div>
-          
+
           {/* Suspense wrapper for handling package query */}
           <Suspense fallback={<div>Loading package...</div>}>
             <PackageQueryComponent onPackageSelect={handlePackageSelect} />
