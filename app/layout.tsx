@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Friendly English Talk",
+  title: "English Friendly Talk",
   description: "Unlock your English potential now!",
 };
 
